@@ -58,7 +58,10 @@ int FINS_ip_form_node(const char* ip)
      c = (ip+char_cntr);
   }
   
-  return atoi(node_val);
+  int res = atoi(node_val);
+  free(node_val);
+  
+  return res;
 }
 
 int FINS_close(FINS_t* c)
