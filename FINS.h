@@ -49,6 +49,8 @@ typedef struct FINS_t
 FINS_t* FINS_create_eth_connection(const char* iface, const char* ip, const int port);
 int FINS_connect(FINS_t * c);
 int FINS_close(FINS_t * c);
+int FINS_set_mode_run(FINS_t * c, const int mode);
+int FINS_set_mode_stop(FINS_t * c);
 int FINS_read(FINS_t * c, const int type, const int from, const int nb, unsigned short *oData);
 int FINS_write(FINS_t * c, const int type, const int from, const int nb, const unsigned short *iData);
 int FINS_is_connected(FINS_t * c);

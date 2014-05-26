@@ -32,6 +32,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <stdint.h>    
 
 int FINS_ip_form_node(const char* ip)
 {
@@ -88,6 +89,7 @@ FINS_t* FINS_create_eth_connection(const char* iface, const char* ip, const int 
 
     shutdown(fd, SHUT_RDWR);
 
+  
     connection->local_addr = (struct sockaddr_in*)malloc(sizeof(struct sockaddr_in));
     bzero((char *)connection->local_addr, sizeof(struct sockaddr_in));
     connection->local_addr->sin_family = AF_INET;
@@ -129,10 +131,59 @@ int FINS_connect(FINS_t* c)
     return 0;
 }
 
+int FINS_set_mode_run(FINS_t * c, const int mode)
+{
+    FINS_cmd fins_resp;
+
+    //Select RUN command
+    c->gp_cmd[10] = 0x04;
+    c->gp_cmd[11] = 0x01;
+
+    //Set program number to 0000
+    c->gp_cmd[12] = 0x00;
+    c->gp_cmd[13] = 0x00;
+
+    c->gp_cmd[14] = mode;
+
+    static int sendlen = 15;
+
+    if(sendto(c->socket_id, c->gp_cmd, sendlen, 0,
+    (struct sockaddr *)c->remote_addr, sizeof(struct sockaddr_in)) != sendlen)
+        return -1;
+
+    // Confirm arival of package
+    if(recv(c->socket_id, fins_resp, FINS_COMMAND_MAX_SIZE, 0) < 0)
+        return -1;
+
+    return 0;
+}
+
+int FINS_set_mode_stop(FINS_t * c)
+{
+    FINS_cmd fins_resp;
+
+    //Select STOP command
+    c->gp_cmd[10] = 0x04;
+    c->gp_cmd[11] = 0x02;
+
+    static int sendlen = 12;
+
+    if(sendto(c->socket_id, c->gp_cmd, sendlen, 0,
+    (struct sockaddr *)c->remote_addr, sizeof(struct sockaddr_in)) != sendlen)
+        return -1;
+
+    // Confirm arival of package
+    if(recv(c->socket_id, fins_resp, FINS_COMMAND_MAX_SIZE, 0) < 0)
+        return -1;
+
+    return 0;
+
+}
+
 int FINS_read(FINS_t* c, const int type, const int from,
 		const int nb, short unsigned int* oData)
 {
-  FINS_cmd fins_resp;
+    FINS_cmd fins_resp;
   
   // Select the read command
     c->gp_cmd[10] = 0x01;
